@@ -1,0 +1,38 @@
+web:
+  restart: always
+  build: ./app
+  volumes:
+    - "./app:/usr/src/app"
+  ports:
+    - "3000:3500"
+  environment: 
+    - NODE_CONFIG={"db":{"host":"service_db"}}
+  links:
+    - "service_db:service_db"
+
+nginx:
+  restart: always
+  build: ./nginx/
+  ports:
+    - "80:80"
+  volumes:
+    - /www/public
+  volumes_from:
+    - web
+  links:
+    - web:web
+
+service_db:
+  restart: always
+  image: sameersbn/postgresql:9.6-2
+  ports:
+    - "5432:5432"
+  environment:
+    - DEBUG=false
+
+    - DB_USER=admin
+    - DB_PASS=password123
+    - DB_NAME=contoso
+  
+  volumes:
+    - /srv/docker/postgresql:/var/lib/postgresql
